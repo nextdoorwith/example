@@ -8,19 +8,19 @@
 	xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
 
 <h:head>
-	<title>Hello World!</title>
+	<title>Show Headers</title>
 </h:head>
 
 <h:body>
 
 	<f:metadata>
-		<f:viewAction action="#{helloWorldView.init()}" />
+		<f:viewAction action="#{showHeaders.init()}" />
 	</f:metadata>
 
-	<div>ハローワールド</div>
+	<div>リクエストヘッダ一覧: </div>
+	<hr />
+	<h:outputText value="#{showHeaders.dispValue}" style="white-space: pre;" />
+	<hr />
 
-	<h:form>
-		<h:commandButton action="#{helloWorldView.execute()}" value="実行" />
-	</h:form>
 </h:body>
 </h:html>
