@@ -1,26 +1,23 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<h:html lang="ja" xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-	xmlns:jsf="http://xmlns.jcp.org/jsf"
-	xmlns:f="http://xmlns.jcp.org/jsf/core"
-	xmlns:h="http://xmlns.jcp.org/jsf/html"
-	xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:html lang="ja" xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:jsf="http://xmlns.jcp.org/jsf" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
 
 <h:head>
-	<title>Hello World!</title>
+  <title>Hello World!</title>
 </h:head>
 
 <h:body>
 
-	<f:metadata>
-		<f:viewAction action="#{helloWorldView.init()}" />
-	</f:metadata>
+  <f:metadata>
+    <f:viewAction action="#{helloWorldView.init()}" />
+  </f:metadata>
 
-	<div>ハローワールド</div>
+  <div>ハローワールド</div>
 
-	<h:form>
-		<h:commandButton action="#{helloWorldView.execute()}" value="実行" />
-	</h:form>
+  <h:form>
+    <h:commandButton action="#{helloWorldView.execute()}" value="実行" />
+  </h:form>
 </h:body>
 </h:html>
