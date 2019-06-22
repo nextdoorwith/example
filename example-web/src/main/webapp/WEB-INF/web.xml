@@ -10,4 +10,14 @@
 		<welcome-file>HelloWorld.xhtml</welcome-file>
 	</welcome-file-list>
 
+	<!-- Googleサイトマップ作成用サーブレット -->
+	<servlet>
+		<servlet-name>sitemapgen</servlet-name>
+		<servlet-class>example.web.servlet.SimpleSitemapGenerator</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>sitemapgen</servlet-name>
+		<url-pattern>/sitemap</url-pattern>
+	</servlet-mapping>
+
 </web-app>
