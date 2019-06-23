@@ -170,7 +170,7 @@ public class SimpleSitemapGenerator extends HttpServlet {
 			logger.debug("tmpdir: {}", tmpDirPath);
 
 			// URL一覧の作成
-			List<String> fileList = getFileList(this.scanPath, this.inRegexes, this.exRegexes);
+			List<String> fileList = getFileList(this.contextPath, this.scanPath, this.inRegexes, this.exRegexes);
 			List<WebSitemapUrl> urlList = createUrlList(this.baseUrl, fileList);
 
 			// サイトマップファイルの作成
@@ -204,13 +204,16 @@ public class SimpleSitemapGenerator extends HttpServlet {
 	/**
 	 * 指定フォルダ配下のファイル一覧を取得する。
 	 * 
+	 * @param rootPath  ルートパス
 	 * @param scanPath  走査フォルダパス
 	 * @param inRegexes 出力対象パターン(正規表現)
 	 * @param exRegexes 出力除外パターン(正規表現)
 	 * @return ファイル一覧
 	 * @throws IOException ファイル一覧取得失敗
 	 */
-	protected List<String> getFileList(Path scanPath, Pattern[] inRegexes, Pattern[] exRegexes) throws IOException {
+	protected List<String> getFileList(Path rootPath, Path scanPath, Pattern[] inRegexes, Pattern[] exRegexes)
+			throws IOException
+	{
 
 		// 引数がnullの場合は補完
 		inRegexes = (inRegexes != null ? inRegexes : new Pattern[0]);
@@ -224,9 +227,10 @@ public class SimpleSitemapGenerator extends HttpServlet {
 			while (it.hasNext()) {
 				Path path = it.next();
 
-				// 走査パスを基準としたパスに変換、併せてセパレータをURLの"/"に置き換え
+				// ルートを基準としたパスに変換する。
+				// 併せてセパレータをURLの"/"に置き換え
 				// 例) C:\path\to\scan, C:\path\to\scan\path\to\page.xhtml -> /path/to/page.xhtml
-				Path relPath = scanPath.relativize(path);
+				Path relPath = rootPath.relativize(path);
 				String relPathStr = URL_SEP + relPath.toString().replace(File.separatorChar, URL_SEP);
 
 				// 除外条件にマッチすれば除外
