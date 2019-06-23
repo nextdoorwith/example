@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -284,27 +285,6 @@ public class SimpleSitemapGenerator extends HttpServlet {
 	}
 
 	/**
-	 * 文字列右側の文字を除外する。
-	 * 
-	 * @param str 文字列
-	 * @param ch  除外文字
-	 * @return 文字列
-	 */
-	protected String stripRight(String str, char ch) {
-		if (str == null) {
-			return null;
-		}
-		char[] chars = str.toCharArray();
-		int idx;
-		for (idx = str.length() - 1; 0 <= idx; idx--) {
-			if (chars[idx] != ch) {
-				break;
-			}
-		}
-		return str.substring(0, idx + 1);
-	}
-
-	/**
 	 * プロパティからスキャン情報を取得する。
 	 * 
 	 * @param prop プロパティ
@@ -315,8 +295,12 @@ public class SimpleSitemapGenerator extends HttpServlet {
 		// sitemap.scan(グループ1).(グループ2)
 		Pattern pattern = Pattern.compile(PROPKEY_SCAN);
 
+		// キー名(昇順)でスキャン情報を作成するためにソート
+		List<String> keys = new ArrayList<>(prop.stringPropertyNames());
+		Collections.sort(keys);
+
 		Map<String, SitemapScan> map = new LinkedHashMap<>();
-		for (String key : prop.stringPropertyNames()) {
+		for (String key : keys) {
 
 			Matcher matcher = pattern.matcher(key);
 			if (!matcher.find()) {
@@ -366,6 +350,27 @@ public class SimpleSitemapGenerator extends HttpServlet {
 			list.add(Pattern.compile(val));
 		}
 		return list;
+	}
+
+	/**
+	 * 文字列右側の文字を除外する。
+	 * 
+	 * @param str 文字列
+	 * @param ch  除外文字
+	 * @return 文字列
+	 */
+	protected String stripRight(String str, char ch) {
+		if (str == null) {
+			return null;
+		}
+		char[] chars = str.toCharArray();
+		int idx;
+		for (idx = str.length() - 1; 0 <= idx; idx--) {
+			if (chars[idx] != ch) {
+				break;
+			}
+		}
+		return str.substring(0, idx + 1);
 	}
 
 	/**
