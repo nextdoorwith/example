@@ -9,11 +9,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -58,14 +60,17 @@ public class SimpleSitemapGenerator extends HttpServlet {
 	/** プロパティ名: ベースURL */
 	private static final String PROPKEY_BASE_URL = "sitemap.baseurl";
 
-	/** プロパティ名: 走査ディレクトリ */
-	private static final String PROPKEY_SCAN_PATH = "sitemap.scandir";
+	/** プロパティ名: 除外パターン */
+	private static final String PROPKEY_EXCLUDE = "sitemap.exclude";
 
-	/** プロパティ名(接頭語): 対象パターン */
-	private static final String PROPKEY_PREFIX_INCLUDE_PATTERN = "sitemap.include.pattern";
+	/** プロパティ名: スキャン */
+	private static final String PROPKEY_SCAN = "^sitemap.scan([0-9]+).(.*)$";
 
-	/** プロパティ名(接頭語): 除外パターン */
-	private static final String PROPKEY_PREFIX_EXCLUDE_PATTERN = "sitemap.exclude.pattern";
+	/** プロパティ名(接頭語): パス */
+	private static final String PROPKEY_SUFFIX_PATH = "path";
+
+	/** プロパティ名(接頭語): パターン */
+	private static final String PROPKEY_SUFFIX_PATTERN = "pattern";
 
 	/** URL区切り文字 */
 	private static final char URL_SEP = '/';
@@ -90,14 +95,11 @@ public class SimpleSitemapGenerator extends HttpServlet {
 	/** ベースURL */
 	private URL baseUrl;
 
-	/** 走査パス */
-	private Path scanPath;
-
-	/** 対象パターン */
-	private Pattern[] inRegexes;
+	/** サイトマップスキャンリスト */
+	private List<SitemapScan> scanList;
 
 	/** 除外パターン */
-	private Pattern[] exRegexes;
+	private List<Pattern> exPatternList;
 
 	@Override
 	public void init() throws ServletException {
@@ -125,32 +127,21 @@ public class SimpleSitemapGenerator extends HttpServlet {
 			throw new ServletException("invalid baseurl", e);
 		}
 
-		// 走査ディレクトリの取得
-		String scanPathStr = prop.getProperty(PROPKEY_SCAN_PATH);
-		if (scanPathStr == null) {
-			throw new ServletException("missing parameter: " + PROPKEY_SCAN_PATH);
-		}
-		Path scanPath = Paths.get(contextPath.toString(), scanPathStr);
-
-		// 対象パターンの取得
-		String[] inRegexStrs = getMultiProperties(prop, PROPKEY_PREFIX_INCLUDE_PATTERN);
-		Pattern[] inRegexes = createRegexes(inRegexStrs);
+		// スキャンエントリの取得
+		List<SitemapScan> scanList = parseScanEntries(prop);
 
 		// 除外パターンの取得
-		String[] exRegexStrs = getMultiProperties(prop, PROPKEY_PREFIX_EXCLUDE_PATTERN);
-		Pattern[] exRegexes = createRegexes(exRegexStrs);
+		List<Pattern> exPatternList = parseExcludeEntries(prop);
 
 		this.contextPath = contextPath;
 		this.baseUrl = baseUrl;
-		this.scanPath = scanPath;
-		this.inRegexes = inRegexes;
-		this.exRegexes = exRegexes;
+		this.scanList = scanList;
+		this.exPatternList = exPatternList;
 
 		logger.debug("contextPath: {}", this.contextPath);
 		logger.debug("baseUrl: {}", this.baseUrl);
-		logger.debug("scanPath: {}", this.scanPath);
-		logger.debug("includeRegex: {}", Arrays.toString(this.inRegexes));
-		logger.debug("excludeRegex: {}", Arrays.toString(this.exRegexes));
+		logger.debug("scanList: {}", this.scanList);
+		logger.debug("exPatternList: {}", this.exPatternList);
 
 		logger.trace("init(): end");
 	}
@@ -169,15 +160,10 @@ public class SimpleSitemapGenerator extends HttpServlet {
 			tmpDirPath = Files.createTempDirectory("sitemap");
 			logger.debug("tmpdir: {}", tmpDirPath);
 
-			// URL一覧の作成
-			List<String> fileList = getFileList(this.contextPath, this.scanPath, this.inRegexes, this.exRegexes);
-			List<WebSitemapUrl> urlList = createUrlList(this.baseUrl, fileList);
-
-			// サイトマップファイルの作成
+			// ファイル一覧からURLを生成してサイトマップを作成
 			WebSitemapGenerator wsg = new WebSitemapGenerator(this.baseUrl, tmpDirPath.toFile());
-			for (WebSitemapUrl url : urlList) {
-				logger.info("sitemap url: {}", url.getUrl());
-				wsg.addUrl(url);
+			for (SitemapScan scan : this.scanList) {
+				loadUrl(wsg, scan);
 			}
 			wsg.write();
 
@@ -192,8 +178,6 @@ public class SimpleSitemapGenerator extends HttpServlet {
 			Files.copy(sitemapFilePath, resp.getOutputStream());
 			resp.flushBuffer();
 
-			logger.info("responsed: sitemap url: {}", urlList.size());
-
 		} finally {
 			cleanup(tmpDirPath);
 		}
@@ -202,25 +186,19 @@ public class SimpleSitemapGenerator extends HttpServlet {
 	}
 
 	/**
-	 * 指定フォルダ配下のファイル一覧を取得する。
+	 * サイトマップスキャン情報に基づいてURLをロードする。
 	 * 
-	 * @param rootPath  ルートパス
-	 * @param scanPath  走査フォルダパス
-	 * @param inRegexes 出力対象パターン(正規表現)
-	 * @param exRegexes 出力除外パターン(正規表現)
-	 * @return ファイル一覧
+	 * @param wsg  サイトマップジェネレータ
+	 * @param scan サイトマップスキャン
 	 * @throws IOException ファイル一覧取得失敗
 	 */
-	protected List<String> getFileList(Path rootPath, Path scanPath, Pattern[] inRegexes, Pattern[] exRegexes)
-			throws IOException
-	{
-
-		// 引数がnullの場合は補完
-		inRegexes = (inRegexes != null ? inRegexes : new Pattern[0]);
-		exRegexes = (exRegexes != null ? exRegexes : new Pattern[0]);
+	protected void loadUrl(WebSitemapGenerator wsg, SitemapScan scan) throws IOException {
+		if (scan == null || scan.scanPath == null) {
+			return;
+		}
 
 		// 走査パス配下のファイル一覧を取得し、マッチング判定してファイル一覧を作成
-		List<String> fileList = new ArrayList<>();
+		Path scanPath = Paths.get(this.contextPath.toString(), scan.scanPath.toString());
 		try (Stream<Path> walk = Files.walk(scanPath).filter(Files::isRegularFile)) {
 
 			Iterator<Path> it = walk.iterator();
@@ -230,103 +208,44 @@ public class SimpleSitemapGenerator extends HttpServlet {
 				// ルートを基準としたパスに変換する。
 				// 併せてセパレータをURLの"/"に置き換え
 				// 例) C:\path\to\scan, C:\path\to\scan\path\to\page.xhtml -> /path/to/page.xhtml
-				Path relPath = rootPath.relativize(path);
+				Path relPath = this.contextPath.relativize(path);
 				String relPathStr = URL_SEP + relPath.toString().replace(File.separatorChar, URL_SEP);
 
 				// 除外条件にマッチすれば除外
-				if (regexesMatched(exRegexes, relPathStr)) {
+				if (regexesMatched(this.exPatternList, relPathStr)) {
 					logger.trace("exclude path: {}", relPathStr);
 					continue;
 				}
 
 				// 対象条件にマッチしない場合は除外
-				if (!regexesMatched(inRegexes, relPathStr)) {
+				if (!regexesMatched(scan.patternList, relPathStr)) {
 					logger.trace("no include path: {}", relPathStr);
 					continue;
 				}
 
-				fileList.add(relPathStr);
+				// エントリとなるWebSitemapUrlを生成
+				String url = this.baseUrl + relPathStr;
+				Options opts = new Options(url);
+				opts = opts.changeFreq(ChangeFreq.HOURLY);
+				opts = opts.lastMod(new Date(Files.getLastModifiedTime(path).toMillis()));
+				opts = opts.priority(1.0);
+				WebSitemapUrl wsu = opts.build();
+
+				wsg.addUrl(wsu);
+				logger.info("add: {}", wsu.getUrl());
 			}
 		}
-		return fileList;
-	}
-
-	/**
-	 * ファイル一覧からURL一覧を生成する。
-	 * 
-	 * @param baseUrl  ベースURL
-	 * @param fileList ファイル一覧(コンテキストパス基準のパスを前提)
-	 * @return URL一覧
-	 * @throws IOException URL生成失敗
-	 */
-	protected List<WebSitemapUrl> createUrlList(URL baseUrl, List<String> fileList) throws IOException {
-
-		// URL一覧を生成
-		List<WebSitemapUrl> urlList = new ArrayList<>();
-		Date now = new Date();
-		for (String filePathStr : fileList) {
-
-			String url = baseUrl + filePathStr;
-
-			// エントリとなるWebSitemapUrlを生成
-			Options opts = new Options(url);
-			opts = opts.changeFreq(ChangeFreq.HOURLY);
-			opts = opts.lastMod(now);
-			opts = opts.priority(1.0);
-			WebSitemapUrl wsu = opts.build();
-
-			urlList.add(wsu);
-			logger.debug("add url: {}", url);
-		}
-
-		return urlList;
-	}
-
-	/**
-	 * 複数のプロパティを配列にマップする。
-	 * 
-	 * @param prop   プロパティオブジェクト
-	 * @param prefix プロパティ名接頭語
-	 * @return プロパティ値
-	 */
-	protected String[] getMultiProperties(Properties prop, String prefix) {
-		List<String> list = new ArrayList<>();
-		for (String key : prop.stringPropertyNames()) {
-			if (!key.startsWith(prefix)) {
-				continue;
-			}
-			String val = prop.getProperty(key);
-			if (val == null || val.trim().length() <= 0) {
-				continue;
-			}
-			list.add(val.trim());
-		}
-		return list.toArray(new String[list.size()]);
-	}
-
-	/**
-	 * 文字列配列から正規表現パターン配列を生成する。
-	 * 
-	 * @param patternStrs 正規表現の文字列配列
-	 * @return 正規表現オブジェクト配列
-	 */
-	protected Pattern[] createRegexes(String[] patternStrs) {
-		Pattern[] patterns = new Pattern[patternStrs.length];
-		for (int i = 0; i < patterns.length; i++) {
-			patterns[i] = Pattern.compile(patternStrs[i]);
-		}
-		return patterns;
 	}
 
 	/**
 	 * 正規表現配列のいずれかにマッチするかを判定する。
 	 * 
-	 * @param patterns 正規表現配列
+	 * @param patterns 正規表現リスト
 	 * @param value    検査対象値
 	 * @return いずれかにマッチした場合はtrue、それ以外はfalse
 	 */
-	protected boolean regexesMatched(Pattern[] patterns, String value) {
-		for (Pattern p : patterns) {
+	protected boolean regexesMatched(List<Pattern> patternList, String value) {
+		for (Pattern p : patternList) {
 			if (p.matcher(value).find()) {
 				return true;
 			}
@@ -383,6 +302,91 @@ public class SimpleSitemapGenerator extends HttpServlet {
 			}
 		}
 		return str.substring(0, idx + 1);
+	}
+
+	/**
+	 * プロパティからスキャン情報を取得する。
+	 * 
+	 * @param prop プロパティ
+	 * @return スキャン情報リスト
+	 */
+	private List<SitemapScan> parseScanEntries(Properties prop) {
+
+		// sitemap.scan(グループ1).(グループ2)
+		Pattern pattern = Pattern.compile(PROPKEY_SCAN);
+
+		Map<String, SitemapScan> map = new LinkedHashMap<>();
+		for (String key : prop.stringPropertyNames()) {
+
+			Matcher matcher = pattern.matcher(key);
+			if (!matcher.find()) {
+				continue;
+			}
+
+			// グループ1の値をキーとしてスキャン情報を格納
+			String id = matcher.group(1);
+			SitemapScan scan;
+			if (map.containsKey(id)) {
+				scan = map.get(id);
+			} else {
+				scan = new SitemapScan();
+				map.put(id, scan);
+			}
+
+			// グループ2の値に基づいてスキャン情報に値を設定
+			String arg = matcher.group(2);
+			String val = prop.getProperty(key);
+			if (arg.equals(PROPKEY_SUFFIX_PATH)) {
+				scan.scanPath = Paths.get(val);
+			} else if (arg.startsWith(PROPKEY_SUFFIX_PATTERN)) {
+				scan.patternList.add(Pattern.compile(val));
+			} else {
+				continue;
+			}
+		}
+		return new ArrayList<>(map.values());
+	}
+
+	/**
+	 * プロパティから除外パターンを取得する。
+	 * 
+	 * @param prop プロパティオブジェクト
+	 * @return 正規表現パターン一覧
+	 */
+	protected List<Pattern> parseExcludeEntries(Properties prop) {
+		List<Pattern> list = new ArrayList<>();
+		for (String key : prop.stringPropertyNames()) {
+			if (!key.startsWith(PROPKEY_EXCLUDE)) {
+				continue;
+			}
+			String val = prop.getProperty(key);
+			if (val == null || val.trim().length() <= 0) {
+				continue;
+			}
+			list.add(Pattern.compile(val));
+		}
+		return list;
+	}
+
+	/**
+	 * スキャン情報
+	 * 
+	 * @author nextdoorwith
+	 *
+	 */
+	private static class SitemapScan {
+
+		/** スキャンパス */
+		private Path scanPath;
+
+		/** パターン一覧 */
+		private List<Pattern> patternList = new ArrayList<>();
+
+		@Override
+		public String toString() {
+			return "SitemapScan [scanPath=" + scanPath + ", patternList=" + patternList + "]";
+		}
+
 	}
 
 }
