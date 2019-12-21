@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+	<Properties>
+		<Property name="base">.\log</Property>
+	</Properties>
+	
+	<Appenders>
+		<File name="File" fileName="${base}\log.txt">
+			<PatternLayout
+				pattern="▲%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+		</File>
+		<File name="FileDebug" fileName="${base}\log-debug.txt">
+			<PatternLayout
+				pattern="●%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+			<ThresholdFilter level="debug" />
+		</File>
+		<File name="FileTrace" fileName="${base}\log-trace.txt">
+			<PatternLayout
+				pattern="■%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+			<ThresholdFilter level="trace" />
+		</File>
+	</Appenders>
+
+	<Loggers>
+		<Logger name="a.b.c1" level="error" />
+		<Logger name="a.b.c2" level="debug" />
+		<Logger name="a.b.c3" level="trace" />
+		<Root level="info">
+			<AppenderRef ref="File" />
+			<AppenderRef ref="FileDebug" />
+			<AppenderRef ref="FileTrace" />
+		</Root>
+	</Loggers>
+
+</Configuration>
