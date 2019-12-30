@@ -28,6 +28,8 @@ public class FTPCommandTraceTest {
 		for (FTPFile file : client.listFiles(".")) {
 			logger.debug("name={}", file.getName());
 		}
+		client.quit();
+		client.disconnect();
 	}
 
 }
