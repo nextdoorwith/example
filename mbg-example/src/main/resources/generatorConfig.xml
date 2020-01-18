@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+	<context id="default" targetRuntime="MyBatis3">
+
+		<plugin type="ndw.ExamplePlugin">
+			<property name="arg1" value="arg1value" />
+			<property name="arg2" value="arg2value" />
+		</plugin>
+		<plugin type="ndw.TracePlugin"/>
+		<plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin" />
+
+		<!-- コメント生成の抑制 -->
+		<commentGenerator>
+			<property name="suppressDate" value="true" />
+			<property name="addRemarkComments" value="false" />
+		</commentGenerator>
+
+		<!-- DB接続 -->
+		<jdbcConnection driverClass="org.mariadb.jdbc.Driver"
+			connectionURL="jdbc:mariadb://192.168.220.3/mbg_example"
+			userId="testuser" password="testuserpass" />
+
+		<!-- モデル生成 -->
+		<javaModelGenerator
+			targetPackage="example.entity"
+			targetProject="tmp\java" />
+
+		<!-- Mapper XML生成 -->
+		<sqlMapGenerator
+			targetPackage="example.mapper"
+			targetProject="tmp\resources" />
+
+		<!-- Mapper生成 -->
+		<javaClientGenerator type="XMLMAPPER"
+			targetPackage="example.mapper"
+			targetProject="tmp\java" />
+
+		<!-- 対象テーブル -->
+		<table schema="mybatis_example" tableName="%" modelType="flat" />
+
+	</context>
+
+</generatorConfiguration>

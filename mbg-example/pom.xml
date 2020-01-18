@@ -1,0 +1,85 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>ndw</groupId>
+	<artifactId>mbg-example</artifactId>
+	<version>1.0.0</version>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	<!-- 独自プラグインの依存関係 -->
+	<!-- (mybatis-generator-pluginのためのものではない) -->
+	<dependencies>
+		<!-- mybatis-generator -->
+		<dependency>
+			<groupId>org.mybatis.generator</groupId>
+			<artifactId>mybatis-generator-core</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<!-- その他共通 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.25</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+
+		<plugins>
+
+			<!-- mybatis-generatorプラグイン定義 -->
+			<plugin>
+				<groupId>org.mybatis.generator</groupId>
+				<artifactId>mybatis-generator-maven-plugin</artifactId>
+				<version>1.4.0</version>
+				<configuration>
+					<overwrite>true</overwrite>
+				</configuration>
+				<dependencies>
+					<!-- プラグインで使用するJDBCドライバ(mariadb) -->
+					<dependency>
+						<groupId>org.mariadb.jdbc</groupId>
+						<artifactId>mariadb-java-client</artifactId>
+						<version>2.5.2</version>
+					</dependency>
+					<!-- 独自プラグイン(自プロジェクト)を依存関係に追加 -->
+					<!-- 注意)リポジトリに登録されているとそちらが優先されるので -->
+					<!-- installしないこと -->
+					<dependency>
+						<groupId>ndw</groupId>
+						<artifactId>mbg-example</artifactId>
+						<version>1.0.0</version>
+						<scope>system</scope>
+						<!-- installせずに自プロジェクト参照 -->
+						<systemPath>C:\jee7devkit\workspace\example\mbg-example\target\mbg-example-1.0.0.jar</systemPath>
+					</dependency>
+				</dependencies>
+				<executions>
+					<!-- package時に合わせてmybatis生成 -->
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+
+			</plugin>
+
+		</plugins>
+
+	</build>
+
+</project>
