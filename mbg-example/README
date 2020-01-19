@@ -48,7 +48,8 @@ mysql -u testuser -p mbg_example
 	create table mst_employee(
 	    cid char(4) not null,
 	    eid char(6) not null,
-	    name varbinary(256) not null,
+	    name varchar(128) not null,
+	    name_enc varbinary(512) null,
 	    addr varchar(1024),
 	    age int,
 	    note varchar(4096),
@@ -57,8 +58,8 @@ mysql -u testuser -p mbg_example
 	    updated_timestamp timestamp null default null,
 	    updated_userid varchar(128),
 	    version int not null default 1,
-	    test_dummy_col1 varchar(1), -- 例で使うカラム
-	    test_dummy_col2 int, -- 例で使うカラム
+	    test_dummy_col1 varchar(128) null, -- 例で使うカラム
+	    test_dummy_col2 varchar(128) null, -- 例で使うカラム
 	    primary key(cid, eid)
 	);
 

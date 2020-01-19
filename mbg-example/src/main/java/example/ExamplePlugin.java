@@ -1,14 +1,18 @@
 package example;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
+import org.mybatis.generator.api.JavaFormatter;
 import org.mybatis.generator.api.PluginAdapter;
+import org.mybatis.generator.api.dom.DefaultJavaFormatter;
 import org.mybatis.generator.api.dom.java.Field;
 import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
 import org.mybatis.generator.api.dom.java.Interface;
@@ -17,6 +21,8 @@ import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.api.dom.xml.TextElement;
 import org.mybatis.generator.api.dom.xml.VisitableElement;
 import org.mybatis.generator.api.dom.xml.XmlElement;
+import org.mybatis.generator.config.Context;
+import org.mybatis.generator.config.JavaClientGeneratorConfiguration;
 
 public class ExamplePlugin extends PluginAdapter {
 
@@ -52,11 +58,11 @@ public class ExamplePlugin extends PluginAdapter {
 	public void initialized(IntrospectedTable introspectedTable) {
 
 		// 特定の名前のカラムについては、後続処理から除外
-		// (モデルやXMLからdummy2の存在が消される。)
+		// (モデルやXMLからtest_dummy_col1の存在が消される。)
 		Iterator<IntrospectedColumn> cols = introspectedTable.getBaseColumns().iterator();
 		while (cols.hasNext()) {
 			IntrospectedColumn ic = cols.next();
-			if (ic.getActualColumnName().equals("testDummyCol1")) {
+			if (ic.getActualColumnName().toLowerCase().equals("test_dummy_col1")) {
 				cols.remove();
 			}
 		}
@@ -107,7 +113,7 @@ public class ExamplePlugin extends PluginAdapter {
 				String all = m.group(0); // "#{dummy,jdbcType=VARCHAR})"
 				String col = m.group(1); // "dummy,jdbcType=VARCHAR"
 				if (col.startsWith("testDummyCol2,")) {
-					String replace = "func(" + all + ")";
+					String replace = "LOWER(" + all + ")";
 					m.appendReplacement(sb, replace);
 				}
 			}
@@ -121,5 +127,31 @@ public class ExamplePlugin extends PluginAdapter {
 		}
 
 		return true;
+	}
+
+	@Override
+	public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles() {
+
+		// Java Client系のファイルを独自に追加
+		// (JavaClientの設定をベースにサンプルJavaクラスを追加)
+
+		// generatorConfig.xmlの
+		// javaClientGenerator要素の定義値を取得
+		Context ctx = super.context;
+		JavaClientGeneratorConfiguration config = ctx.getJavaClientGeneratorConfiguration();
+		String targetPackage = config.getTargetPackage();
+		String targetProject = config.getTargetProject();
+
+		// クラス定義の作成
+		String className = targetPackage + ".AddedExample";
+		FullyQualifiedJavaType clazz = new FullyQualifiedJavaType(className);
+		TopLevelClass topLevelClass = new TopLevelClass(clazz);
+		topLevelClass.addFileCommentLine("/** これはサンプルで動的に追加したクラスです。 */");
+
+		// 最終成果物を生成
+		JavaFormatter formatter = new DefaultJavaFormatter();
+		GeneratedJavaFile gjf = new GeneratedJavaFile(topLevelClass, targetProject, formatter);
+
+		return Arrays.asList(gjf);
 	}
 }

@@ -335,6 +335,76 @@ public class MstEmployeeExample {
             return (Criteria) this;
         }
 
+        public Criteria andNameIsNull() {
+            addCriterion("name is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameIsNotNull() {
+            addCriterion("name is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameEqualTo(String value) {
+            addCriterion("name =", value, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameNotEqualTo(String value) {
+            addCriterion("name <>", value, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameGreaterThan(String value) {
+            addCriterion("name >", value, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameGreaterThanOrEqualTo(String value) {
+            addCriterion("name >=", value, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameLessThan(String value) {
+            addCriterion("name <", value, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameLessThanOrEqualTo(String value) {
+            addCriterion("name <=", value, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameLike(String value) {
+            addCriterion("name like", value, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameNotLike(String value) {
+            addCriterion("name not like", value, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameIn(List<String> values) {
+            addCriterion("name in", values, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameNotIn(List<String> values) {
+            addCriterion("name not in", values, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameBetween(String value1, String value2) {
+            addCriterion("name between", value1, value2, "name");
+            return (Criteria) this;
+        }
+
+        public Criteria andNameNotBetween(String value1, String value2) {
+            addCriterion("name not between", value1, value2, "name");
+            return (Criteria) this;
+        }
+
         public Criteria andAddrIsNull() {
             addCriterion("addr is null");
             return (Criteria) this;
@@ -855,76 +925,6 @@ public class MstEmployeeExample {
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol1IsNull() {
-            addCriterion("test_dummy_col1 is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1IsNotNull() {
-            addCriterion("test_dummy_col1 is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1EqualTo(String value) {
-            addCriterion("test_dummy_col1 =", value, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1NotEqualTo(String value) {
-            addCriterion("test_dummy_col1 <>", value, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1GreaterThan(String value) {
-            addCriterion("test_dummy_col1 >", value, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1GreaterThanOrEqualTo(String value) {
-            addCriterion("test_dummy_col1 >=", value, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1LessThan(String value) {
-            addCriterion("test_dummy_col1 <", value, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1LessThanOrEqualTo(String value) {
-            addCriterion("test_dummy_col1 <=", value, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1Like(String value) {
-            addCriterion("test_dummy_col1 like", value, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1NotLike(String value) {
-            addCriterion("test_dummy_col1 not like", value, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1In(List<String> values) {
-            addCriterion("test_dummy_col1 in", values, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1NotIn(List<String> values) {
-            addCriterion("test_dummy_col1 not in", values, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1Between(String value1, String value2) {
-            addCriterion("test_dummy_col1 between", value1, value2, "testDummyCol1");
-            return (Criteria) this;
-        }
-
-        public Criteria andTestDummyCol1NotBetween(String value1, String value2) {
-            addCriterion("test_dummy_col1 not between", value1, value2, "testDummyCol1");
-            return (Criteria) this;
-        }
-
         public Criteria andTestDummyCol2IsNull() {
             addCriterion("test_dummy_col2 is null");
             return (Criteria) this;
@@ -935,52 +935,62 @@ public class MstEmployeeExample {
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol2EqualTo(Integer value) {
+        public Criteria andTestDummyCol2EqualTo(String value) {
             addCriterion("test_dummy_col2 =", value, "testDummyCol2");
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol2NotEqualTo(Integer value) {
+        public Criteria andTestDummyCol2NotEqualTo(String value) {
             addCriterion("test_dummy_col2 <>", value, "testDummyCol2");
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol2GreaterThan(Integer value) {
+        public Criteria andTestDummyCol2GreaterThan(String value) {
             addCriterion("test_dummy_col2 >", value, "testDummyCol2");
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol2GreaterThanOrEqualTo(Integer value) {
+        public Criteria andTestDummyCol2GreaterThanOrEqualTo(String value) {
             addCriterion("test_dummy_col2 >=", value, "testDummyCol2");
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol2LessThan(Integer value) {
+        public Criteria andTestDummyCol2LessThan(String value) {
             addCriterion("test_dummy_col2 <", value, "testDummyCol2");
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol2LessThanOrEqualTo(Integer value) {
+        public Criteria andTestDummyCol2LessThanOrEqualTo(String value) {
             addCriterion("test_dummy_col2 <=", value, "testDummyCol2");
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol2In(List<Integer> values) {
+        public Criteria andTestDummyCol2Like(String value) {
+            addCriterion("test_dummy_col2 like", value, "testDummyCol2");
+            return (Criteria) this;
+        }
+
+        public Criteria andTestDummyCol2NotLike(String value) {
+            addCriterion("test_dummy_col2 not like", value, "testDummyCol2");
+            return (Criteria) this;
+        }
+
+        public Criteria andTestDummyCol2In(List<String> values) {
             addCriterion("test_dummy_col2 in", values, "testDummyCol2");
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol2NotIn(List<Integer> values) {
+        public Criteria andTestDummyCol2NotIn(List<String> values) {
             addCriterion("test_dummy_col2 not in", values, "testDummyCol2");
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol2Between(Integer value1, Integer value2) {
+        public Criteria andTestDummyCol2Between(String value1, String value2) {
             addCriterion("test_dummy_col2 between", value1, value2, "testDummyCol2");
             return (Criteria) this;
         }
 
-        public Criteria andTestDummyCol2NotBetween(Integer value1, Integer value2) {
+        public Criteria andTestDummyCol2NotBetween(String value1, String value2) {
             addCriterion("test_dummy_col2 not between", value1, value2, "testDummyCol2");
             return (Criteria) this;
         }
