@@ -1,25 +1,41 @@
 
 ★説明
 
-
 1) プロジェクトフォルダの構成
 
-src/main/java
-    example             ... MBGプラグインのサンプル
-    example.misc        ... サンプルのためのダミークラス
-    example.mybatis     ... MBGで作成した成果物を格納(Javaクラス)
-src/main/resources
-    example.mybatis     ... MBGで作成した成果物を格納(XML)
-    generatorConfig.xml ... MBG構成ファイル
-pom.xml                 ... maven POM(MBGプラグイン設定)
+プロジェクトの構成は次の通りです。
+
+	src/main/java
+	    example             ... MBGプラグインのサンプル
+	    example.misc        ... サンプルのためのダミークラス
+	    example.mybatis     ... MBGで作成した成果物を格納(Javaクラス)
+	src/main/resources
+	    example.mybatis     ... MBGで作成した成果物を格納(XML)
+	    generatorConfig.xml ... MBG構成ファイル
+	pom.xml                 ... maven POM(MBGプラグイン設定)
+	README                  ... このファイル
 
 
-2) 使用しているデータベース
+2) 実行方法
+
+	1. DB接続情報の定義
+	   次のMBG設定ファイルにあるDB接続情報を、実行環境に合わせて変更します。
+	   
+	    /mbg-example/src/main/resources/generatorConfig.xml
+	    
+	    ※ここで説明するサンプルは、
+	      「3) サンプルで使用するDB環境」のDDLを使う前提になっていますが、
+	      このDDLでなくても動作可能だと思います。
+	    
+	2. MBGの実行
+	    
+	    mavenのpackageゴールを実行します。
+	    (プラグインのコンパイル(パッケージ化)とMBGの実行が行えます。)
+
+
+3) サンプルで使用するDB環境
 
 サンプルDBを構築するためのDDLサンプルです。
-DB接続情報は次のgeneratorConfig.xmlで定義しています。
-
-/mbg-example/src/main/resources/generatorConfig.xml
 
 ---
 mysql
