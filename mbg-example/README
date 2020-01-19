@@ -1,0 +1,67 @@
+
+★説明
+
+
+1) プロジェクトフォルダの構成
+
+src/main/java
+    example             ... MBGプラグインのサンプル
+    example.misc        ... サンプルのためのダミークラス
+    example.mybatis     ... MBGで作成した成果物を格納(Javaクラス)
+src/main/resources
+    example.mybatis     ... MBGで作成した成果物を格納(XML)
+    generatorConfig.xml ... MBG構成ファイル
+pom.xml                 ... maven POM(MBGプラグイン設定)
+
+
+2) 使用しているデータベース
+
+サンプルDBを構築するためのDDLサンプルです。
+DB接続情報は次のgeneratorConfig.xmlで定義しています。
+
+/mbg-example/src/main/resources/generatorConfig.xml
+
+---
+mysql
+	create database mbg_example default character set utf8mb4;
+	grant all privileges on mbg_example.* to 'testuser'@'localhost' identified by 'testuserpass';
+	grant all privileges on mbg_example.* to 'testuser'@'%' identified by 'testuserpass';
+	quit
+
+mysql -u testuser -p mbg_example
+
+	drop table if exists mst_company;
+	create table mst_company(
+	    cid char(4) not null,
+	    name varchar(256) not null,
+	    addr varchar(1024),
+	    num_of_employee int,
+	    created_timestamp timestamp not null,
+	    created_userid varchar(128) not null,
+	    updated_timestamp timestamp null default null,
+	    updated_userid varchar(128),
+	    version int not null default 1,
+	    primary key(cid)
+	);
+	
+	drop table if exists mst_employee;
+	create table mst_employee(
+	    cid char(4) not null,
+	    eid char(6) not null,
+	    name varbinary(256) not null,
+	    addr varchar(1024),
+	    age int,
+	    note varchar(4096),
+	    created_timestamp timestamp not null,
+	    created_userid varchar(128) not null,
+	    updated_timestamp timestamp null default null,
+	    updated_userid varchar(128),
+	    version int not null default 1,
+	    test_dummy_col1 varchar(1), -- 例で使うカラム
+	    test_dummy_col2 int, -- 例で使うカラム
+	    primary key(cid, eid)
+	);
+
+	quit
+---
+以上

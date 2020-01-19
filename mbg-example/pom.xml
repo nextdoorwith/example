@@ -22,6 +22,20 @@
 			<artifactId>mybatis-generator-core</artifactId>
 			<version>1.4.0</version>
 		</dependency>
+		
+		<!-- mybatis -->
+		<!-- MBGとしては不要だが、作成後ソースのエラー回避のため -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+				<version>3.5.3</version>
+		</dependency>
+	<!-- <dependency> -->
+	<!-- <groupId>org.mybatis.dynamic-sql</groupId> -->
+	<!-- <artifactId>mybatis-dynamic-sql</artifactId> -->
+	<!-- <version>1.1.4</version> -->
+	<!-- </dependency> -->
+		
 		<!-- その他共通 -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -63,7 +77,7 @@
 						<version>1.0.0</version>
 						<scope>system</scope>
 						<!-- installせずに自プロジェクト参照 -->
-						<systemPath>C:\jee7devkit\workspace\example\mbg-example\target\mbg-example-1.0.0.jar</systemPath>
+						<systemPath>${basedir}\target\${project.build.finalName}.jar</systemPath>
 					</dependency>
 				</dependencies>
 				<executions>

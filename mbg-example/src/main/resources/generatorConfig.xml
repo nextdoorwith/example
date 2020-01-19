@@ -7,11 +7,15 @@
 
 	<context id="default" targetRuntime="MyBatis3">
 
-		<plugin type="ndw.ExamplePlugin">
+		<!-- サンプルプラグイン -->
+		<plugin type="example.ExamplePlugin">
 			<property name="arg1" value="arg1value" />
 			<property name="arg2" value="arg2value" />
 		</plugin>
-		<plugin type="ndw.TracePlugin"/>
+		<!-- イベントトレースプラグイン -->
+		<plugin type="example.TracePlugin"/>
+
+		<!-- 成果物上書きのためのプラグイン -->
 		<plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin" />
 
 		<!-- コメント生成の抑制 -->
@@ -27,18 +31,18 @@
 
 		<!-- モデル生成 -->
 		<javaModelGenerator
-			targetPackage="example.entity"
-			targetProject="tmp\java" />
+			targetPackage="example.mybatis.entity"
+			targetProject="src\main\java" />
 
 		<!-- Mapper XML生成 -->
 		<sqlMapGenerator
-			targetPackage="example.mapper"
-			targetProject="tmp\resources" />
+			targetPackage="example.mybatis.mapper"
+			targetProject="src\main\resources" />
 
 		<!-- Mapper生成 -->
 		<javaClientGenerator type="XMLMAPPER"
-			targetPackage="example.mapper"
-			targetProject="tmp\java" />
+			targetPackage="example.mybatis.mapper"
+			targetProject="src\main\java" />
 
 		<!-- 対象テーブル -->
 		<table schema="mybatis_example" tableName="%" modelType="flat" />

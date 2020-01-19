@@ -1,6 +1,5 @@
-package ndw;
+package example;
 
-import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -21,14 +20,16 @@ import org.mybatis.generator.api.dom.xml.XmlElement;
 
 public class ExamplePlugin extends PluginAdapter {
 
-	// テスト用にメソッドに設定するアノテーション
-	private FullyQualifiedJavaType reqanno = new FullyQualifiedJavaType("example.Required");
+	/* テスト用にメソッドに設定するアノテーション */
+	private FullyQualifiedJavaType reqanno = new FullyQualifiedJavaType("example.misc.Required");
 
-	// {xxxx}を検索するための正規表現
-	Pattern paramPattern = Pattern.compile("\\#\\{(.*?)\\}");
+	/** {xxxx}を検索・置換するための正規表現 */
+	private Pattern paramPattern = Pattern.compile("\\#\\{(.*?)\\}");
 
+	/** プラグインプロパティ1 */
 	private String arg1;
 
+	/** プラグインプロパティ2 */
 	private String arg2;
 
 	@Override
@@ -55,7 +56,7 @@ public class ExamplePlugin extends PluginAdapter {
 		Iterator<IntrospectedColumn> cols = introspectedTable.getBaseColumns().iterator();
 		while (cols.hasNext()) {
 			IntrospectedColumn ic = cols.next();
-			if (ic.getActualColumnName().equals("dummy2")) {
+			if (ic.getActualColumnName().equals("testDummyCol1")) {
 				cols.remove();
 			}
 		}
@@ -67,7 +68,7 @@ public class ExamplePlugin extends PluginAdapter {
 	{
 		// 既存メソッドから新しいメソッドを作成してインターフェイスに追加
 		Method addMethod = new Method(method);
-		addMethod.setName(method.getName() + "Option");
+		addMethod.setName(method.getName() + "AddedTest"); // selectByPrimaryKeyAddedTestを追加
 		addMethod.addAnnotation("@" + reqanno.getShortName()); // アノテーションを追加
 		interfaze.addMethod(addMethod); // Javaインターフェイスにメソッド追加
 
@@ -81,7 +82,7 @@ public class ExamplePlugin extends PluginAdapter {
 			IntrospectedTable introspectedTable, ModelClassType modelClassType)
 	{
 		String fieldName = field.getName();
-		if (fieldName.equals("dummy")) {
+		if (fieldName.equals("testDummyCol1")) {
 			field.addAnnotation("@" + reqanno.getShortName()); // アノテーションを追加
 			topLevelClass.addImportedType(reqanno); // import文一覧に宣言を追加
 		}
@@ -105,7 +106,7 @@ public class ExamplePlugin extends PluginAdapter {
 			while (m.find()) {
 				String all = m.group(0); // "#{dummy,jdbcType=VARCHAR})"
 				String col = m.group(1); // "dummy,jdbcType=VARCHAR"
-				if (col.startsWith("dummy,")) {
+				if (col.startsWith("testDummyCol2,")) {
 					String replace = "func(" + all + ")";
 					m.appendReplacement(sb, replace);
 				}

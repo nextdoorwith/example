@@ -1,4 +1,4 @@
-package ndw;
+package example;
 
 import java.util.Collections;
 import java.util.List;
