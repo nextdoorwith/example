@@ -1,5 +1,6 @@
 package example.mybatis.entity;
 
+import example.misc.Required;
 import java.util.Date;
 
 public class MstEmployee {
@@ -109,6 +110,7 @@ public class MstEmployee {
      *
      * @mbg.generated
      */
+    @Required
     private String testDummyCol2;
 
     /**

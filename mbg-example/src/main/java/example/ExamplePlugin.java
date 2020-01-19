@@ -62,7 +62,7 @@ public class ExamplePlugin extends PluginAdapter {
 		Iterator<IntrospectedColumn> cols = introspectedTable.getBaseColumns().iterator();
 		while (cols.hasNext()) {
 			IntrospectedColumn ic = cols.next();
-			if (ic.getActualColumnName().toLowerCase().equals("test_dummy_col1")) {
+			if (ic.getActualColumnName().equalsIgnoreCase("test_dummy_col1")) {
 				cols.remove();
 			}
 		}
@@ -87,8 +87,8 @@ public class ExamplePlugin extends PluginAdapter {
 	public boolean modelFieldGenerated(Field field, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn,
 			IntrospectedTable introspectedTable, ModelClassType modelClassType)
 	{
-		String fieldName = field.getName();
-		if (fieldName.equals("testDummyCol1")) {
+		String columnName = introspectedColumn.getActualColumnName();
+		if (columnName.equalsIgnoreCase("test_dummy_col2")) {
 			field.addAnnotation("@" + reqanno.getShortName()); // アノテーションを追加
 			topLevelClass.addImportedType(reqanno); // import文一覧に宣言を追加
 		}
@@ -110,8 +110,8 @@ public class ExamplePlugin extends PluginAdapter {
 			Matcher m = paramPattern.matcher(line);
 			StringBuffer sb = new StringBuffer(); // 置換後文字列を格納
 			while (m.find()) {
-				String all = m.group(0); // "#{dummy,jdbcType=VARCHAR})"
-				String col = m.group(1); // "dummy,jdbcType=VARCHAR"
+				String all = m.group(0); // "#{testDummyCol2,jdbcType=...}"
+				String col = m.group(1); // "testDummyCol2,jdbcType=..."
 				if (col.startsWith("testDummyCol2,")) {
 					String replace = "LOWER(" + all + ")";
 					m.appendReplacement(sb, replace);
