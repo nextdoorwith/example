@@ -54,7 +54,13 @@ public class MDCServletFilter implements Filter {
 
 		// 本来の業務処理
 		logger.trace("doFilterでテストロギング");
-		chain.doFilter(request, response);
+		
+		try {
+			chain.doFilter(request, response);
+		}finally {
+			// 他のスレッドでの誤使用防止
+			resetMdc();
+		}
 	}
 
 	@Override
@@ -65,7 +71,7 @@ public class MDCServletFilter implements Filter {
 	private void initMdc(ServletRequest request) {
 		try {
 
-			MDC.clear(); // 念のため初期化
+			resetMdc(); // 念のため初期化
 
 			// HTTP要求以外の場合は何もしない
 			if (!(request instanceof HttpServletRequest)) {
@@ -91,6 +97,10 @@ public class MDCServletFilter implements Filter {
 			// 念のため、例外の事実を検知できるよう最低限ロギングする。
 			logger.warn("unexpected exception: {}", e.getMessage());
 		}
+	}
+	
+	private void resetMdc() {
+		MDC.clear();
 	}
 
 }
