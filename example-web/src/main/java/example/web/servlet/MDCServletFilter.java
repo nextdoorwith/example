@@ -49,13 +49,15 @@ public class MDCServletFilter implements Filter {
 	{
 		logger.trace("doFilter(): invoked!");
 
-		// MDC関連の初期化
-		initMdc(request);
+		// 念のため初期化
+		resetMdc();
 
-		// 本来の業務処理
+		// MDC関連
+		setupMdc(request);
 		logger.trace("doFilterでテストロギング");
 		
 		try {
+			// 本来の業務処理
 			chain.doFilter(request, response);
 		}finally {
 			// 他のスレッドでの誤使用防止
@@ -68,10 +70,8 @@ public class MDCServletFilter implements Filter {
 		logger.trace("destroy(): invoked!");
 	}
 
-	private void initMdc(ServletRequest request) {
+	private void setupMdc(ServletRequest request) {
 		try {
-
-			resetMdc(); // 念のため初期化
 
 			// HTTP要求以外の場合は何もしない
 			if (!(request instanceof HttpServletRequest)) {
@@ -81,9 +81,9 @@ public class MDCServletFilter implements Filter {
 
 			// 非セッション関連項目の挿入 --------------------------------------
 
-			// Refererヘッダ
-			String xffVal = httpRequest.getHeader(HTTP_ITEM_HOST);
-			MDC.put(MDC_ITEM_HOST, xffVal != null ? xffVal : EMPTY_VALUE);
+			// Hostヘッダ
+			String hostVal = httpRequest.getHeader(HTTP_ITEM_HOST);
+			MDC.put(MDC_ITEM_HOST, hostVal != null ? hostVal : EMPTY_VALUE);
 
 			// セッション関連項目の挿入 ----------------------------------------
 			HttpSession ss = httpRequest.getSession(false); // 存在しない場合は作成しない
